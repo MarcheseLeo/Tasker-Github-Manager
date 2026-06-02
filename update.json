@@ -1,10 +1,11 @@
 {
-  "version": "1.4",
-  "code_url": "URL_DEL_TUO_CODICE_JAVA",
+  "version": "1.5",
+  "code_url": "https://raw.githubusercontent.com/MarcheseLeo/Tasker-Github-Manager/refs/heads/main/codice_app.java",
   "changelog": [
     "🚀 Aggiunta la barra di ricerca rapida",
     "🎨 Nuova interfaccia stile Samsung",
     "🐛 Risolto il bug delle tastiere",
-    "✅ Ottimizzazione generale"
+    "✅ Ottimizzazione generale",
+    "🐛 Other bugs fix"
   ]
 }
