@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Manager - Test Locale PC</title>
+    <style>
+        /* ==========================================================================
+           1. STILI CSS (Contenuto della variabile %html_base)
+           ========================================================================== */
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 16px; line-height: 1.5; background-color: #f1f5f9; color: #333; overflow-x: hidden; }
+        .title { font-size: 22px; font-weight: 800; margin-bottom: 16px; text-align: center; color: #111; }
+        .dashboard-stats { display: flex; justify-content: space-around; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px; }
+        .stat-box { text-align: center; } 
+        .stat-title { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; } 
+        .stat-num { font-size: 20px; font-weight: 800; color: #0f172a; }
+        .search-container { margin-bottom: 12px; } 
+        .search-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 15px; box-sizing: border-box; outline: none; transition: border-color 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); background: #fff; color: #333; } 
+        .search-input:focus { border-color: #007bff; }
+        .sort-select { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-weight: 600; color: #334155; font-size: 12px; outline: none; margin-bottom: 0; }
+        .nav-pills-container { display: flex; gap: 16px; overflow-x: auto; padding: 4px 0 16px 0; scrollbar-width: none; margin-bottom: 4px; } 
+        .nav-pills-container::-webkit-scrollbar { display: none; }
+        .nav-pill { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; min-width: 72px; position: relative; } 
+        .pill-icon { width: 52px; height: 52px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); } 
+        .nav-pill:active .pill-icon { transform: scale(0.9); } 
+        .pill-text { font-size: 12px; font-weight: 600; color: #475569; text-align: center; line-height: 1.1; } 
+        .update-badge { position: absolute; top: 0; right: 8px; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; border: 2px solid #fff; display: none; }
+        .p-red { background: #fee2e2; color: #dc2626; } .p-blue { background: #e0f2fe; color: #0284c7; } .p-purple { background: #f3e8ff; color: #9333ea; } .p-green { background: #dcfce7; color: #16a34a; } .p-gray { background: #f1f5f9; color: #475569; }
+        .form-group { margin-bottom: 16px; } .form-label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; } .form-control { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 15px; box-sizing: border-box; background: #f8fafc; color: #333; outline: none; transition: border 0.2s; } .form-control:focus { border-color: #007bff; background: #fff; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; } .checkbox-group input { width: 18px; height: 18px; accent-color: #007bff; } .checkbox-label { font-size: 14px; font-weight: 600; color: #334155; }
+        .btn-submit { width: 100%; padding: 14px; background: #007bff; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; margin-top: 8px; cursor: pointer; transition: background 0.2s; } .btn-submit:active { background: #0056b3; } .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; } .btn-update { background: #10b981; } .btn-update:active { background: #059669; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 24px; padding: 14px 20px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); opacity: 0; transform: translate(-50%, 20px); transition: opacity 0.3s, transform 0.3s; } #toast.show { visibility: visible; opacity: 1; transform: translate(-50%, 0); }
+        .view { display: none; animation: slideIn 0.3s ease-out; } .view.active { display: block; } @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .back-btn { display: none; align-items: center; gap: 8px; font-weight: 700; color: #334155; padding: 10px 16px; background: #e2e8f0; border-radius: 20px; width: fit-content; margin-bottom: 16px; cursor: pointer; font-size: 14px; transition: background 0.2s; } .back-btn:active { background: #cbd5e1; }
+        .view-title { font-size: 18px; font-weight: 800; margin-bottom: 0; display: flex; align-items: center; gap: 8px; color: #1e293b; }
+        .folder-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; } .folder-box { aspect-ratio: 1; border-radius: 24px; padding: 16px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; border: 2px solid transparent; } .folder-box:active { transform: scale(0.96); } .folder-icon { font-size: 38px; margin-bottom: 12px; } .folder-name { font-weight: 700; font-size: 15px; line-height: 1.2; } .folder-count { font-size: 12px; font-weight: 600; opacity: 0.7; margin-top: 6px; }
+        .box-epicode { background: #faf5ff; border-color: #e9d5ff; color: #6b21a8; } .box-frontend { background: #f0f9ff; border-color: #bae6fd; color: #0369a1; } .box-build { background: #fff7ed; border-color: #fed7aa; color: #c2410c; } .box-altro { background: #fff; border-color: #e2e8f0; color: #475569; }
+        .cards-container { display: flex; flex-direction: column; gap: 16px; padding-bottom: 20px; } .card { width: 100%; border-radius: 16px; padding: 16px; background: #fff; border: 1px solid #e9ecef; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 5px solid #ccc; display: flex; flex-direction: column; box-sizing: border-box; overflow-wrap: break-word; }
+        .repo-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; } .repo { font-size: 15px; font-weight: 700; margin-bottom: 0; width: 55%; word-break: break-word; } .badges { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; width: 42%; } .badge { font-size: 10px; font-weight: 700; padding: 4px 6px; border-radius: 8px; white-space: nowrap; }
+        .badge-lang { background: #e2e8f0; color: #334155; } .badge-health { background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; } .badge-success { background: #dcfce7; color: #166534; } .badge-danger { background: #fee2e2; color: #b91c1c; } .badge-warning { background: #fef08a; color: #854d0e; }
+        .line { font-size: 13px; margin-bottom: 6px; color: #555; display: flex; align-items: flex-start; } .line > div { flex: 1; min-width: 0; } .icon { margin-right: 8px; font-size: 14px; min-width: 16px; text-align: center; } .bold { font-weight: 600; margin-right: 4px; color: #222; } a { color: #0066cc; text-decoration: none; font-weight: 600; word-break: break-word; }
+        .metrics-bar { font-size: 13px; font-weight: 600; color: #64748b; background: #f8fafc; padding: 8px; border-radius: 8px; margin: 10px 0; text-align: center; border: 1px solid #e2e8f0;} .actions { margin-top: auto; padding-top: 12px; border-top: 1px dashed #ddd; display: flex; gap: 6px; justify-content: flex-start; flex-wrap: wrap; } .btn { background: #e2e8f0; color: #334155; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; } .btn-primary { background: #0f172a; color: #fff; } .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; } .btn-warning { background: #fef08a; color: #854d0e; border: 1px solid #fde047; } .btn-pages { background: #dcfce7; color: #166534; border: 1px solid #86efac;}
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; margin: 10px auto; border: 4px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); } .notif-item { padding: 12px; border-bottom: 1px solid #e2e8f0; } .notif-item:last-child { border-bottom: none; }
+        
+        /* Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #0f172a; color: #e0e0e0; } .title { color: #ffffff; } .back-btn { background: #334155; color: #f1f5f9; } .back-btn:active { background: #475569; } .view-title { color: #f1f5f9; } .sort-select { background: #334155; color: #e2e8f0; border-color: #475569; } .form-label { color: #94a3b8; } .form-control { background: #1e293b; border-color: #334155; color: #f8fafc; } .form-control:focus { background: #0f172a; border-color: #3b82f6; } .checkbox-group { background: #1e293b; border-color: #334155; } .checkbox-label { color: #e2e8f0; } .pill-text { color: #94a3b8; } .p-red { background: #450a0a; color: #fca5a5; } .p-blue { background: #082f49; color: #7dd3fc; } .p-purple { background: #3b0764; color: #d8b4fe; } .p-green { background: #064e3b; color: #86efac; } .p-gray { background: #1e293b; color: #cbd5e1; } .box-epicode { background: rgba(126, 34, 206, 0.15); border-color: rgba(126, 34, 206, 0.4); color: #d8b4fe; } .box-frontend { background: rgba(3, 105, 161, 0.15); border-color: rgba(3, 105, 161, 0.4); color: #7dd3fc; } .box-build { background: rgba(194, 65, 12, 0.15); border-color: rgba(194, 65, 12, 0.4); color: #fdba74; } .box-altro { background: rgba(71, 85, 105, 0.15); border-color: rgba(71, 85, 105, 0.4); color: #cbd5e1; } .card { background: #1e1e1e; border-color: #333; } .line { color: #aaa; } .bold { color: #eee; } a { color: #66b3ff; } .dashboard-stats { background: #1e1e1e; border-color: #333; } .stat-title { color: #94a3b8; } .stat-num { color: #f1f5f9; } .search-input { background: #1e1e1e; border-color: #444; color: #eee; } .badge-lang { background: #334155; color: #e2e8f0; } .badge-health { background: #1e293b; border-color: #334155; color: #cbd5e1; } .badge-success { background: #064e3b; color: #86efac; } .badge-danger { background: #450a0a; color: #fca5a5; } .badge-warning { background: #422006; color: #fde047; } .metrics-bar { background: #1e293b; color: #94a3b8; border-color: #334155;} .actions { border-top-color: #444; } .btn { background: #475569; color: #f1f5f9; } .btn-primary { background: #e2e8f0; color: #0f172a; } .btn-danger { background: #450a0a; color: #fca5a5; border-color: #7f1d1d; } .btn-pages { background: #064e3b; color: #86efac; border-color: #047857;} .btn-warning { background: #422006; color: #fde047; border-color: #713f12; } .btn-update { background: #047857; color: #fff; border:none; } .notif-item { border-bottom-color: #333; } .update-badge { border-color: #121212; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class='title'>📊 GITHUB MANAGER (SIMULAZIONE PC)</div>
+    
+    <div class='dashboard-stats'>
+        <div class='stat-box'><div class='stat-title'>Pubbliche</div><div class='stat-num'>42</div></div>
+        <div class='stat-box'><div class='stat-title'>Private</div><div class='stat-num'>1</div></div>
+        <div class='stat-box'><div class='stat-title'>Totali</div><div class='stat-num'>43</div></div>
+    </div>
+
+    <div class='search-container'>
+        <input type='text' id='searchInput' class='search-input' placeholder='🔍 Cerca una repository...' onkeyup='filterRepos()'>
+    </div>
+
+    <div id='navPills' class='nav-pills-container'>
+      <div class='nav-pill' onclick="openView('view-create-repo')"><div class='pill-icon p-red'>➕</div><div class='pill-text'>Nuova Repo</div></div>
+      <div class='nav-pill' onclick=\"loadNavView('notifications')\"><div class='pill-icon p-purple'>🔔</div><div class='pill-text'>Notifiche</div></div>
+      <div class='nav-pill' onclick=\"loadNavView('profile')\"><div class='pill-icon p-blue'>👤</div><div class='pill-text'>Profilo</div></div>
+      <div class='nav-pill' onclick=\"loadNavView('explore')\"><div class='pill-icon p-green'>⭐</div><div class='pill-text'>Esplora</div></div>
+      <div class='nav-pill' onclick="loadAppInfo()"><div class='pill-icon p-gray'>⚙️<div id='updateBadge' class='update-badge'></div></div><div class='pill-text'>App Info</div></div>
+    </div>
+
+    <div id='backBtn' class='back-btn' onclick='goBack()'>⬅️ Indietro</div>
+
+    <div id='view-notifications' class='view'><div class='view-title' style='margin-bottom:16px;'>🔔 Notifiche GitHub</div><div id='content-notifications'></div></div>
+    <div id='view-profile' class='view'><div class='view-title' style='margin-bottom:16px;'>👤 Il tuo Profilo</div><div id='content-profile'></div></div>
+    <div id='view-explore' class='view'><div class='view-title' style='margin-bottom:16px;'>⭐ Repo di Tendenza</div><div id='content-explore'></div></div>
+    <div id='view-app-info' class='view'><div class='view-title' style='margin-bottom:16px;'>⚙️ Info & Aggiornamenti</div><div id='content-app-info'></div></div>
+
+    <div id='view-create-repo' class='view'>
+        <div class='view-title' style='margin-bottom:16px;'>➕ Crea Repository</div>
+        <div class='card'>
+            <div class='form-group'><label class='form-label'>Nome Repository *</label><input type='text' id='newRepoName' class='form-control' placeholder='Es. frontend-mentor-calc'></div>
+            <div class='form-group'><label class='form-label'>Descrizione</label><input type='text' id='newRepoDesc' class='form-control' placeholder='Es. Progetto HTML'></div>
+            <div class='checkbox-group'><input type='checkbox' id='newRepoPrivate'><label class='checkbox-label'>Privata 🔒</label></div>
+            <div class='checkbox-group'><input type='checkbox' id='newRepoReadme' checked><label class='checkbox-label'>README.md 📄</label></div>
+            <button id='btnCreate' class='btn-submit' onclick='createRepo()'>Crea Repository</button>
+        </div>
+    </div>
+
+    <div id='view-rename-repo' class='view'>
+        <div class='view-title' style='margin-bottom:16px;'>✏️ Rinomina Repository</div>
+        <div class='card'>
+            <div class='form-group'><label class='form-label'>Nuovo Nome</label><input type='text' id='renameRepoInput' class='form-control'></div>
+            <button id='btnRename' class='btn-submit' onclick='executeRename()'>Rinomina</button>
+        </div>
+    </div>
+
+    <div id='view-home' class='view active'>
+        <div class='folder-grid'>
+            <div class='folder-box box-epicode' onclick="openView('view-Epicode')"><div class='folder-icon'>🟣</div><div class='folder-name'>Epicode</div><div class='folder-count'>2 Repo</div></div>
+            <div class='folder-box box-frontend' onclick="openView('view-FrontendMentor')"><div class='folder-icon'>🔵</div><div class='folder-name'>Frontend Mentor</div><div class='folder-count'>2 Repo</div></div>
+        </div>
+    </div>
+
+    <div id='view-search' class='view'><div class='view-title' style='margin-bottom:16px;'>🔍 Risultati Ricerca</div><div id='search-results' class='cards-container'></div></div>
+
+    <div id='view-Epicode' class='view'>
+        <div class='view-title' style='margin-bottom:16px;'>🟣 Epicode</div>
+        <div class='folder-grid'>
+            <div class='folder-box box-epicode' onclick="openView('view-epicode-M6')"><div class='folder-icon'>🗓️</div><div class='folder-name'>Modulo M6</div><div class='folder-count'>2 Repo</div></div>
+        </div>
+    </div>
+
+    <div id='view-epicode-M6' class='view'>
+        <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;'>
+            <div class='view-title'>🗓️ Modulo M6</div>
+            <select class='sort-select' onchange="sortCards(this, 'cards-epicode-M6')">
+                <option value='updated' selected>Recenti</option>
+                <option value='commit'>Ultimo Commit</option>
+                <option value='name'>A-Z</option>
+            </select>
+        </div>
+        <div id='cards-epicode-M6' class='cards-container'>
+            <div class='card original-card' data-name='EPICODE-M6W1D1' data-updated='1717200000000' data-commit='1717196400000'>
+                <div class='repo-header'><div class='repo'>🔹 EPICODE-M6W1D1</div><div class='badges'><span class='badge badge-lang'>JavaScript</span><span class='badge badge-success'>✅ Successo</span></div></div>
+                <div class='line'><span class='icon'>📅</span> <div><span class='bold'>Modifica:</span> 31/05 14:00</div></div>
+                <div class='metrics-bar'>⭐ 0 | fork 0 | watchers 0</div>
+                <div class='actions'><button class='btn btn-warning' onclick="prepRenameRepo('TuoProfile', 'EPICODE-M6W1D1')">✏️ Rinomina</button></div>
+            </div>
+            <div class='card original-card' data-name='EPICODE-M6W1D2' data-updated='1717286400000' data-commit='1717282800000'>
+                <div class='repo-header'><div class='repo'>🔹 EPICODE-M6W1D2</div><div class='badges'><span class='badge badge-lang'>HTML</span><span class='badge badge-warning'>🔄 In esecuzione</span></div></div>
+                <div class='line'><span class='icon'>📅</span> <div><span class='bold'>Modifica:</span> Oggi 09:30</div></div>
+                <div class='metrics-bar'>⭐ 2 | fork 1 | watchers 2</div>
+                <div class='actions'><button class='btn btn-warning' onclick="prepRenameRepo('TuoProfile', 'EPICODE-M6W1D2')">✏️ Rinomina</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id='view-FrontendMentor' class='view'>
+        <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;'>
+            <div class='view-title'>🔵 Frontend Mentor</div>
+            <select class='sort-select' onchange="sortCards(this, 'cards-frontend')">
+                <option value='updated' selected>Recenti</option><option value='commit'>Ultimo Commit</option><option value='name'>A-Z</option>
+            </select>
+        </div>
+        <div id='cards-frontend' class='cards-container'>
+            <div class='card original-card' style='border-left-color: #0284c7;' data-name='FRONTEND-MENTOR-CALC' data-updated='1714521600000' data-commit='1714518000000'>
+                <div class='repo-header'><div class='repo'>🔹 FRONTEND-MENTOR-CALC</div><div class='badges'><span class='badge badge-lang'>CSS</span></div></div>
+                <div class='line'><span class='icon'>📅</span> <div><span class='bold'>Modifica:</span> 01/05 10:00</div></div>
+                <div class='actions'><button class='btn btn-warning' onclick="prepRenameRepo('TuoProfile', 'FRONTEND-MENTOR-CALC')">✏️ Rinomina</button></div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var historyStack = ['view-home'];
+        var GITHUB_TOKEN = '';
+        var GAS_URL = 'https://google.https://script.google.com/macros/s/AKfycbyyrx0s6ncCaejMKmhMLibemWnvwTGDgPqXXoTHJDWe81qlnwjdzUBJKqOBz8We6hnvgQ/exec';
+        var APP_VERSION = '1.0'; // Lasciala a 1.0 per simulare l'update se inserisci un url_json valido sotto
+        var UPDATE_JSON_URL = 'https://raw.githubusercontent.com/MarcheseLeo/Tasker-Github-Manager/refs/heads/main/update.json';
+        var currentRenameOwner = ''; var currentRenameName = ''; var newCodeUrl = '';
+
+        function showToast(msg) { var toast = document.getElementById('toast'); toast.innerText = msg; toast.classList.add('show'); setTimeout(function(){ toast.classList.remove('show'); }, 3500); }
+        function copyText(text) { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('📋 Copiato negli appunti!'); }
+        
+        function openView(viewId) {
+            document.getElementById(historyStack[historyStack.length - 1]).classList.remove('active');
+            historyStack.push(viewId);
+            document.getElementById(viewId).classList.add('active');
+            updateUIElements(); window.scrollTo(0,0);
+        }
+
+        function goBack() {
+            if (historyStack.length > 1) {
+                var current = historyStack.pop();
+                document.getElementById(current).classList.remove('active');
+                document.getElementById(historyStack[historyStack.length - 1]).classList.add('active');
+                updateUIElements();
+            }
+        }
+
+        function updateUIElements() {
+            var isHome = (historyStack.length === 1);
+            document.getElementById('backBtn').style.display = isHome ? 'none' : 'flex';
+            document.getElementById('navPills').style.display = isHome ? 'flex' : 'none';
+            if(isHome) { document.getElementById('searchInput').value = ''; }
+        }
+
+        function sortCards(selectElem, containerId) {
+            var container = document.getElementById(containerId);
+            var cards = Array.from(container.querySelectorAll('.card'));
+            var sortBy = selectElem.value;
+            cards.sort(function(a, b) {
+                if(sortBy === 'updated') return parseInt(b.getAttribute('data-updated')) - parseInt(a.getAttribute('data-updated'));
+                if(sortBy === 'commit') return parseInt(b.getAttribute('data-commit')) - parseInt(a.getAttribute('data-commit'));
+                return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
+            });
+            cards.forEach(function(c) { container.appendChild(c); });
+        }
+
+        window.onload = function() {
+            var selects = document.querySelectorAll('.sort-select');
+            selects.forEach(function(s) { s.dispatchEvent(new Event('change')); });
+            if(UPDATE_JSON_URL && UPDATE_JSON_URL.startsWith('http')) { checkForUpdates(true); }
+        };
+
+        function filterRepos() {
+            var input = document.getElementById('searchInput').value.toUpperCase();
+            var searchView = document.getElementById('view-search');
+            var searchResults = document.getElementById('search-results');
+            var allStandardViews = document.querySelectorAll('.view:not(#view-search)');
+            if (input === '') {
+                searchView.classList.remove('active');
+                document.getElementById(historyStack[historyStack.length - 1]).classList.add('active');
+                updateUIElements();
+            } else {
+                allStandardViews.forEach(function(v) { v.classList.remove('active'); });
+                document.getElementById('backBtn').style.display = 'none';
+                document.getElementById('navPills').style.display = 'none';
+                searchView.classList.add('active'); searchResults.innerHTML = '';
+                var allCards = document.querySelectorAll('.original-card');
+                var count = 0;
+                allCards.forEach(function(card) {
+                    if (card.innerText.toUpperCase().indexOf(input) > -1) {
+                        var clone = card.cloneNode(true); searchResults.appendChild(clone); count++;
+                    }
+                });
+                if(count === 0) searchResults.innerHTML = "<div style='text-align:center; padding: 20px; color:#888;'>Nessuna repository trovata</div>";
+            }
+        }
+
+        /* Simulazione funzioni API (su PC mostrano solo dei feedback) */
+        function createRepo() { showToast('⚙️ Su PC: Creazione simulata con successo!'); setTimeout(goBack, 1500); }
+        function prepRenameRepo(owner, currentName) { currentRenameOwner = owner; currentRenameName = currentName; document.getElementById('renameRepoInput').value = currentName; openView('view-rename-repo'); }
+        function executeRename() { showToast('✏️ Su PC: Rinominazione simulata con successo!'); setTimeout(goBack, 1500); }
+
+        async function loadAppInfo() {
+            openView('view-app-info');
+            var container = document.getElementById('content-app-info');
+            var h = "<div class='card'><div><span class='bold'>Versione Attuale:</span> " + APP_VERSION + "</div><br>";
+            if (!UPDATE_JSON_URL || !UPDATE_JSON_URL.startsWith('http')) {
+                h += "<div>⚠️ Per testare gli aggiornamenti via server inserisci il tuo link raw in UPDATE_JSON_URL dentro lo script.</div></div>";
+                container.innerHTML = h; return;
+            }
+            h += "<div id='updateStatus'>Ricerca aggiornamenti in corso... ⏳</div></div>";
+            container.innerHTML = h; checkForUpdates(false);
+        }
+
+        async function checkForUpdates(silent) {
+            try {
+                let separator = UPDATE_JSON_URL.indexOf('?') !== -1 ? '&' : '?';
+                let res = await fetch(UPDATE_JSON_URL + separator + 't=' + new Date().getTime());
+                if(res.ok) {
+                    let data = await res.json();
+                    if(parseFloat(data.version) > parseFloat(APP_VERSION)) {
+                        document.getElementById('updateBadge').style.display = 'block';
+                        if(silent) { showToast('⚠️ Aggiornamento ' + data.version + ' disponibile! Vai in App Info.'); return; }
+                        newCodeUrl = data.code_url;
+                        var statusDiv = document.getElementById('updateStatus');
+                        if(statusDiv) {
+                           var changelogHtml = '';
+                           if (Array.isArray(data.changelog)) { changelogHtml = "<ul style='margin:8px 0; padding-left:20px; text-align:left;'><li>" + data.changelog.join("</li><li>") + "</li></ul>"; } else { changelogHtml = data.changelog; }
+                           statusDiv.innerHTML = "<div><span class='bold' style='color:#dc2626;'>Nuova versione " + data.version + " disponibile!</span></div><div class='line'>" + changelogHtml + "</div><br><button class='btn-submit btn-update' onclick='downloadUpdate()'>Scarica e Copia Codice</button>";
+                        }
+                    } else { var statusDiv = document.getElementById('updateStatus'); if(statusDiv) statusDiv.innerHTML = "<div style='color:#16a34a;'><span class='bold'>✅ Sei all'ultima versione.</span></div>"; }
+                }
+            } catch(e) {}
+        }
+
+        async function downloadUpdate() { showToast('✅ Simulazione download: Codice scaricato e copiato!'); }
+        function loadNavView(name) { openView('view-'+name); document.getElementById('content-'+name).innerHTML = "<div class='card'>⚙️ Schermata "+name+" attiva. Su PC simula il recupero dati live.</div>"; }
+    </script>
+</body>
+</html>
