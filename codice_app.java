@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.Collections;
 
-/* ⚠️ VARIABILI TASKER ⚠️ */
+/* ⚠️ CONFIGURAZIONE APP ⚠️ */
 String githubToken = "%token";
 String baseGasUrl = "%GAS_URL";
 String updateJsonUrl = "%update_url"; 
@@ -40,10 +40,24 @@ consumer = new Consumer() {
         final Dialog dialog = new Dialog(currentActivity, android.R.style.Theme_DeviceDefault_NoActionBar);
         dialog.setContentView(loaderWebView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         
-        Object closeInterface = new Object() {
-            public void close() { dialog.dismiss(); dialogClosedSignal.onSuccess("closed"); currentActivity.finish(); }
-        };
-        loaderWebView.addJavascriptInterface(closeInterface, "AndroidClose");
+        /* FIX DEFINITIVO: Uso della gesture nativa Back di Android (Sicuro su Tasker) */
+        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            onKey(DialogInterface d, int keyCode, android.view.KeyEvent event) {
+                /* 4 = KEYCODE_BACK, 1 = ACTION_UP */
+                if (keyCode == 4 && event.getAction() == 1) { 
+                    if (loaderWebView.canGoBack()) {
+                        loaderWebView.goBack(); /* Torna alla cartella precedente */
+                        return true;
+                    } else {
+                        dialog.dismiss(); /* Chiude l'app se sei alla Home */
+                        dialogClosedSignal.onSuccess("closed");
+                        currentActivity.finish();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             onCancel(DialogInterface d) { dialogClosedSignal.onSuccess("cancelled"); currentActivity.finish(); }
@@ -127,7 +141,6 @@ html.append("* { box-sizing: border-box; -webkit-tap-highlight-color: transparen
 html.append("body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text-main); padding-bottom: calc(var(--nav-h) + 20px); overflow-x: hidden; transition: background-color 0.3s; } ");
 html.append(".app-header { padding: 40px 20px 16px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--bg); z-index: 10; transition: background 0.3s;} ");
 html.append(".title { font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -0.5px; } ");
-html.append(".btn-close { background: var(--surface); color: var(--text-main); border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; } ");
 html.append(".breadcrumbs { padding: 0 20px 10px 20px; font-size: 14px; font-weight: 600; color: var(--text-sec); display: flex; align-items: center; gap: 8px; overflow-x: auto; white-space: nowrap; } ");
 html.append(".breadcrumbs span { cursor: pointer; transition: color 0.2s; } .breadcrumbs span:active { color: var(--primary); } .breadcrumbs .separator { font-size: 12px; opacity: 0.5; } ");
 html.append(".search-container { padding: 0 20px; margin-bottom: 16px; } ");
@@ -168,15 +181,14 @@ html.append("</style></head><body>");
 if (rawData.startsWith("Errore")) {
     html.append("<div class='container' style='color:var(--danger); padding:40px; text-align:center;'>").append(rawData).append("</div></body></html>");
 } else {
-    /* HEADER E BREADCRUMBS */
-    html.append("<header class='app-header'><h1 class='title' id='mainTitle'>Home</h1><button class='btn-close' onclick='AndroidClose.close()'>✕</button></header>");
+    /* HEADER E BREADCRUMBS SENZA IL BOTTONE DI CHIUSURA */
+    html.append("<header class='app-header'><h1 class='title' id='mainTitle'>Home</h1></header>");
     html.append("<div class='breadcrumbs' id='breadcrumbs'><span onclick=\"goHome()\">Home</span></div>");
 
     html.append("<div id='main-content'>");
     
-    /* VISTA HOME */
     html.append("<div id='view-home' class='view active'>");
-    html.append("<div class='search-container'><div class='search-box'><span>🔍</span><input type='text' id='searchInput' placeholder='Search extensions...' onkeyup='filterHomeRepos()'></div></div>");
+    html.append("<div class='search-container'><div class='search-box'><span>🔍</span><input type='text' id='searchInput' placeholder='Search repositories...' onkeyup='filterHomeRepos()'></div></div>");
     
     html.append("<div class='pills-scroll' id='homePills'>");
     html.append("<div class='pill active' onclick=\"setFilter('All', this)\">All</div>");
@@ -184,7 +196,6 @@ if (rawData.startsWith("Errore")) {
     html.append("<div class='pill' onclick=\"setFilter('Recent', this)\">Recent</div>");
     html.append("</div>");
 
-    /* GENERAZIONE CARTELLE HOME */
     html.append("<div class='container' id='home-folders'><div class='folder-grid'>");
     for (int i = 0; i < categoryOrder.size(); i++) {
         String catName = (String) categoryOrder.get(i);
@@ -199,9 +210,8 @@ if (rawData.startsWith("Errore")) {
     
     html.append("<div class='container repo-container' id='home-filtered-repos' style='display:none;'></div>");
     html.append("<div class='fab' onclick=\"document.getElementById('fabMenu').classList.add('active')\">+</div>");
-    html.append("</div>"); /* Fine Home */
+    html.append("</div>"); 
 
-    /* ALTRE VISTE MAIN (Notifiche, Esplora, Settings) */
     html.append("<div id='view-notifications' class='view'><div class='container' id='content-notifications'></div></div>");
     html.append("<div id='view-explore' class='view'><div class='container' id='content-explore'></div></div>");
     
@@ -211,10 +221,8 @@ if (rawData.startsWith("Errore")) {
     html.append("<div class='list-item' onclick=\"openInternalView('view-appearance', 'Appearance')\"><div class='list-item-content'><div class='list-item-icon'>🎨</div><div><div class='list-item-title'>Appearance</div><div class='list-item-sub'>Theme, colors, layout</div></div></div><div class='list-item-icon'>›</div></div>");
     html.append("<div class='list-item' onclick=\"openInternalView('view-about', 'About')\"><div class='list-item-content'><div class='list-item-icon'>ℹ️</div><div><div class='list-item-title'>Version & About</div><div class='list-item-sub' id='version-sub'>v").append(appVersion).append(" • Clicca per info</div></div></div><div class='list-item-icon' id='settingsVersionBadge' style='color:var(--danger); font-weight:bold; font-size:24px; display:none;'>•</div></div>");
     html.append("</div></div></div>");
+    html.append("</div>");
 
-    html.append("</div>"); /* Fine main-content */
-
-    /* VISTE INTERNE (Appearance, About, Repo Settings, Forms) */
     html.append("<div id='view-appearance' class='view'><div class='container'>");
     html.append("<div class='form-label'>THEME</div><div class='list-group'><div class='list-item'><div class='list-item-content'><div class='list-item-icon'>🌙</div><div class='list-item-title'>AMOLED Dark</div></div><label class='toggle'><input type='checkbox' id='togAmoled' onchange='updateSettings()'><span class='slider'></span></label></div><div class='list-item' onclick='cycleTheme()'><div class='list-item-content'><div class='list-item-icon'>🌗</div><div><div class='list-item-title'>Base Theme</div><div class='list-item-sub' id='lblTheme'>Dark</div></div></div></div></div>");
     html.append("<div class='form-label'>COLOR PALETTE</div><div class='pills-scroll' style='padding:0;'><div class='pill' style='background:#1db954; color:#000;' onclick=\"setAppColor('default', this)\">Spotify</div><div class='pill' style='background:#1d4ed8; color:#fff;' onclick=\"setAppColor('blue', this)\">Blue</div><div class='pill' style='background:#9333ea; color:#fff;' onclick=\"setAppColor('purple', this)\">Purple</div><div class='pill' style='background:#ea580c; color:#fff;' onclick=\"setAppColor('orange', this)\">Orange</div></div>");
@@ -227,7 +235,8 @@ if (rawData.startsWith("Errore")) {
 
     html.append("<div id='view-repo-settings' class='view'><div class='container'><h3 id='rs-title' style='margin-top:0;'>Repo Name</h3><div class='form-label'>GENERAL</div><div class='list-group'><div class='list-item'><div style='width:100%;'><input type='text' id='rs-rename-input' class='form-input' style='margin-bottom:12px;'><button class='btn btn-primary' onclick='executeRename()'>Rinomina Repo</button></div></div></div><div class='form-label' style='color:var(--danger);'>DANGER ZONE</div><div class='list-group' style='border-color:var(--danger);'><div class='list-item' onclick='executeToggleVisibility()'><div class='list-item-content'><div class='list-item-icon' style='color:var(--danger);'>👁️</div><div><div class='list-item-title' style='color:var(--danger);'>Cambia Visibilità</div><div class='list-item-sub' id='rs-vis-sub'>Imposta come Privata/Pubblica</div></div></div></div><div class='list-item' onclick='executeDeleteRepo()'><div class='list-item-content'><div class='list-item-icon' style='color:var(--danger);'>🗑️</div><div><div class='list-item-title' style='color:var(--danger);'>Elimina Repository</div><div class='list-item-sub'>Azione irreversibile</div></div></div></div></div></div></div>");
 
-    /* GENERAZIONE VISTE CARTELLE DINAMICHE */
+    html.append("<script>var dynamicViews = '';</script>");
+    
     for (int i = 0; i < categoryOrder.size(); i++) {
         String catName = (String) categoryOrder.get(i);
         List catList = (List) categoriesMap.get(catName);
@@ -235,7 +244,7 @@ if (rawData.startsWith("Errore")) {
             String viewId = "view-" + catName.replace(" ", "");
             
             if (catName.equals("Epicode")) {
-                html.append("<div id='").append(viewId).append("' class='view'><div class='container'><div class='folder-grid'>");
+                html.append("<script>dynamicViews += `<div id='").append(viewId).append("' class='view'><div class='container'><div class='folder-grid'>`;</script>");
                 List mesi = new ArrayList();
                 for(int j = 0; j < catList.size(); j++) {
                     Object[] rData = (Object[]) catList.get(j);
@@ -248,14 +257,14 @@ if (rawData.startsWith("Errore")) {
                     int repoCount = 0;
                     for(int j = 0; j < catList.size(); j++) { if (((String)((Object[])catList.get(j))[2]).equals(meseCorrente)) repoCount++; }
                     String subViewId = "view-epicode-" + meseCorrente;
-                    html.append("<div class='folder-card' onclick=\"openInternalView('").append(subViewId).append("', 'Modulo ").append(meseCorrente).append("')\"><div class='folder-icon'>🗓️</div><div class='folder-title'>Modulo ").append(meseCorrente).append("</div><div class='repo-meta'>").append(repoCount).append(" Repo</div></div>");
+                    html.append("<script>dynamicViews += `<div class='folder-card' onclick=\"openInternalView('").append(subViewId).append("', 'Modulo ").append(meseCorrente).append("')\"><div class='folder-icon'>🗓️</div><div class='folder-title'>Modulo ").append(meseCorrente).append("</div><div class='repo-meta'>").append(repoCount).append(" Repo</div></div>`;</script>");
                 }
-                html.append("</div></div></div>");
+                html.append("<script>dynamicViews += `</div></div></div>`;</script>");
 
                 for(int m = 0; m < mesi.size(); m++) {
                     String meseCorrente = (String) mesi.get(m);
                     String subViewId = "view-epicode-" + meseCorrente;
-                    html.append("<div id='").append(subViewId).append("' class='view'><div class='container repo-container'>");
+                    html.append("<script>dynamicViews += `<div id='").append(subViewId).append("' class='view'><div class='container repo-container'>`;</script>");
                     for(int j = 0; j < catList.size(); j++) {
                         Object[] rData = (Object[]) catList.get(j);
                         if (((String)rData[2]).equals(meseCorrente)) {
@@ -269,16 +278,16 @@ if (rawData.startsWith("Errore")) {
                                 }
                             }
                             if(rTitle.contains("Privata")) isPriv="true";
-                            html.append("<div class='repo-card original-card' data-name='").append(rRepoName).append("' data-updated='").append(rUpdatedTs).append("'><div class='repo-header'><div class='repo-name'>").append(rRepoName).append("</div><div><button class='btn-icon fav-btn' onclick=\"toggleFavorite('").append(rRepoName).append("', this)\">⭐</button><button class='btn-icon' onclick=\"openRepoSettings('").append(rOwner).append("','").append(rRepoName).append("','").append(isPriv).append("')\">⚙️</button></div></div><div class='badges'>");
-                            if (rLang.length() > 0 && !rLang.equals("N/D")) html.append("<span class='badge-txt badge-lang'>").append(rLang).append("</span>");
-                            if (rDeploy.length() > 0) { String bClass = "badge-health"; if (rDeploy.contains("Successo")) bClass = "badge-success"; else if (rDeploy.contains("Fallito")) bClass = "badge-danger"; else if (rDeploy.contains("esecuzione")) bClass = "badge-warning"; html.append("<span class='badge-txt ").append(bClass).append("'>").append(rDeploy).append("</span>"); }
-                            html.append("</div></div>");
+                            html.append("<script>dynamicViews += `<div class='repo-card original-card' data-name='").append(rRepoName).append("' data-updated='").append(rUpdatedTs).append("'><div class='repo-header'><div class='repo-name'>").append(rRepoName).append("</div><div><button class='btn-icon fav-btn' onclick=\"toggleFavorite('").append(rRepoName).append("', this)\">⭐</button><button class='btn-icon' onclick=\"openRepoSettings('").append(rOwner).append("','").append(rRepoName).append("','").append(isPriv).append("')\">⚙️</button></div></div><div class='badges'>");
+                            if (rLang.length() > 0 && !rLang.equals("N/D")) html.append("dynamicViews += `<span class='badge-txt badge-lang'>").append(rLang).append("</span>`;");
+                            if (rDeploy.length() > 0) { String bClass = "badge-health"; if (rDeploy.contains("Successo")) bClass = "badge-success"; else if (rDeploy.contains("Fallito")) bClass = "badge-danger"; else if (rDeploy.contains("esecuzione")) bClass = "badge-warning"; html.append("dynamicViews += `<span class='badge-txt ").append(bClass).append("'>").append(rDeploy).append("</span>`;"); }
+                            html.append("dynamicViews += `</div></div>`;</script>");
                         }
                     }
-                    html.append("</div></div>");
+                    html.append("<script>dynamicViews += `</div></div>`;</script>");
                 }
             } else {
-                html.append("<div id='").append(viewId).append("' class='view'><div class='container repo-container'>");
+                html.append("<script>dynamicViews += `<div id='").append(viewId).append("' class='view'><div class='container repo-container'>`;</script>");
                 for (int j = 0; j < catList.size(); j++) {
                     Object[] rData = (Object[]) catList.get(j);
                     String rTitle = (String) rData[0]; List rLines = (List) rData[1];
@@ -291,23 +300,23 @@ if (rawData.startsWith("Errore")) {
                         }
                     }
                     if(rTitle.contains("Privata")) isPriv="true";
-                    html.append("<div class='repo-card original-card' data-name='").append(rRepoName).append("' data-updated='").append(rUpdatedTs).append("'><div class='repo-header'><div class='repo-name'>").append(rRepoName).append("</div><div><button class='btn-icon fav-btn' onclick=\"toggleFavorite('").append(rRepoName).append("', this)\">⭐</button><button class='btn-icon' onclick=\"openRepoSettings('").append(rOwner).append("','").append(rRepoName).append("','").append(isPriv).append("')\">⚙️</button></div></div><div class='badges'>");
-                    if (rLang.length() > 0 && !rLang.equals("N/D")) html.append("<span class='badge-txt badge-lang'>").append(rLang).append("</span>");
-                    if (rDeploy.length() > 0) { String bClass = "badge-health"; if (rDeploy.contains("Successo")) bClass = "badge-success"; else if (rDeploy.contains("Fallito")) bClass = "badge-danger"; else if (rDeploy.contains("esecuzione")) bClass = "badge-warning"; html.append("<span class='badge-txt ").append(bClass).append("'>").append(rDeploy).append("</span>"); }
-                    html.append("</div></div>");
+                    html.append("<script>dynamicViews += `<div class='repo-card original-card' data-name='").append(rRepoName).append("' data-updated='").append(rUpdatedTs).append("'><div class='repo-header'><div class='repo-name'>").append(rRepoName).append("</div><div><button class='btn-icon fav-btn' onclick=\"toggleFavorite('").append(rRepoName).append("', this)\">⭐</button><button class='btn-icon' onclick=\"openRepoSettings('").append(rOwner).append("','").append(rRepoName).append("','").append(isPriv).append("')\">⚙️</button></div></div><div class='badges'>");
+                    if (rLang.length() > 0 && !rLang.equals("N/D")) html.append("dynamicViews += `<span class='badge-txt badge-lang'>").append(rLang).append("</span>`;");
+                    if (rDeploy.length() > 0) { String bClass = "badge-health"; if (rDeploy.contains("Successo")) bClass = "badge-success"; else if (rDeploy.contains("Fallito")) bClass = "badge-danger"; else if (rDeploy.contains("esecuzione")) bClass = "badge-warning"; html.append("dynamicViews += `<span class='badge-txt ").append(bClass).append("'>").append(rDeploy).append("</span>`;"); }
+                    html.append("dynamicViews += `</div></div>`;</script>");
                 }
-                html.append("</div></div>");
+                html.append("<script>dynamicViews += `</div></div>`;</script>");
             }
         }
     }
 
-    /* MENU, MODALS & BOTTOM NAV */
+    html.append("<script>document.getElementById('main-content').insertAdjacentHTML('beforeend', dynamicViews);</script>");
+
     html.append("<div id='fabMenu' class='fab-menu' onclick=\"if(event.target===this) this.classList.remove('active')\"><div class='fab-content'><h3 style='margin-top:0; margin-bottom:16px;'>Azioni Rapide</h3><div class='list-group' style='margin:0;'><div class='list-item' onclick=\"document.getElementById('fabMenu').classList.remove('active'); openInternalView('view-create-repo', 'Nuova Repo')\"><div class='list-item-content'><div class='list-item-icon'>➕</div><div class='list-item-title'>Aggiungi Repository</div></div></div></div></div></div>");
     html.append("<div id='updateModal' class='modal-overlay'><div class='modal'><h2>🚀 Aggiornamento!</h2><div class='pill' style='margin: 0 auto; width:fit-content; background:var(--primary); color:#fff;' id='upd-badge-ver'>v?.?</div><div class='modal-body' id='upd-changelog'></div><div class='modal-actions'><button class='btn' style='background:var(--surface-elevated); color:var(--text-main);' onclick='skipUpdate()'>Annulla</button><button class='btn btn-primary' onclick='downloadUpdate()'>Scarica Codice</button></div></div></div>");
     html.append("<div class='bottom-nav' id='bottomNav'><div class='nav-item active' onclick=\"switchMainTab('view-home', this, 'Home')\"><div class='icon'>🏠</div><span>Home</span></div><div class='nav-item' onclick=\"switchMainTab('view-notifications', this, 'Notifiche'); loadNotifications();\"><div class='icon'>🔔</div><span>Notifiche</span></div><div class='nav-item' onclick=\"switchMainTab('view-explore', this, 'Esplora'); loadExplore();\"><div class='icon'>⭐</div><span>Esplora</span></div><div class='nav-item' onclick=\"switchMainTab('view-settings', this, 'Settings')\"><div class='badge-dot' id='navSettingsBadge'></div><div class='icon'>⚙️</div><span>Settings</span></div></div>");
     html.append("<div id='toast'></div>");
 
-    /* SCRIPTS */
     html.append("<script>");
     html.append("var GITHUB_TOKEN = '").append(githubToken).append("'; var GAS_URL = '").append(baseGasUrl).append("'; var APP_VERSION = '").append(appVersion).append("'; var UPDATE_JSON_URL = '").append(updateJsonUrl).append("'; var newCodeUrl = ''; ");
     html.append("var appState = JSON.parse(localStorage.getItem('ghm_state')) || { theme: 'dark', amoled: true, color: 'default', layout: 'grid', favorites: [] }; ");
