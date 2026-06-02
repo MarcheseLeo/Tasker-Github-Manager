@@ -1,11 +1,13 @@
 {
-  "version": "1.5.1",
+  "version": "1.6",
   "code_url": "https://raw.githubusercontent.com/MarcheseLeo/Tasker-Github-Manager/refs/heads/main/codice_app.java",
   "changelog": [
-    "🚀 Aggiunta la barra di ricerca rapida",
-    "🎨 Nuova interfaccia stile Samsung",
-    "🐛 Risolto il bug delle tastiere",
-    "✅ Ottimizzazione generale",
-    "🐛 Other bugs fix"
+    "🚀 Major Redesign: Nuova interfaccia immersiva stile app nativa.",
+    "🧭 Bottom Nav & Gestures: Navigazione a schede e supporto nativo per il tasto indietro del telefono.",
+    "🎨 Appearance: Modalità AMOLED, colori personalizzabili e layout Griglia/Lista.",
+    "⭐ Preferiti Locali: Salva le tue repo preferite per averle sempre a portata di mano.",
+    "⚙️ Danger Zone: Nuova pagina dedicata per rinominare, nascondere o eliminare le repository.",
+    "➕ Quick Actions: Nuovo pulsante fluttuante (FAB) in Home per creare repo al volo.",
+    "🔔 Smart Updates: Nuova modale per gli aggiornamenti con badge persistente nelle impostazioni."
   ]
 }
