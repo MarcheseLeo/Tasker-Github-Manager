@@ -20,7 +20,7 @@ import java.util.Collections;
 String githubToken = "%token";
 String baseGasUrl = "%GAS_URL";
 String updateJsonUrl = "%update_url"; 
-String appVersion = "1.6"; /* 📦 LA TUA VERSIONE ATTUALE */
+String appVersion = "1.6.1"; /* 📦 LA TUA VERSIONE ATTUALE */
 
 uiReadySignal = SingleSubject.create();
 dialogClosedSignal = SingleSubject.create();
